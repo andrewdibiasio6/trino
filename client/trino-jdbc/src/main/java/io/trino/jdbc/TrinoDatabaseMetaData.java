@@ -51,16 +51,13 @@ public class TrinoDatabaseMetaData
     private static final String SEARCH_STRING_ESCAPE = "\\";
 
     private final TrinoConnection connection;
-    private final boolean assumeLiteralNamesInMetadataCallsForNonConformingClients;
     private final boolean assumeLiteralUnderscoreInMetadataCallsForNonConformingClients;
 
     TrinoDatabaseMetaData(
             TrinoConnection connection,
-            boolean assumeLiteralNamesInMetadataCallsForNonConformingClients,
             boolean assumeLiteralUnderscoreInMetadataCallsForNonConformingClients)
     {
         this.connection = requireNonNull(connection, "connection is null");
-        this.assumeLiteralNamesInMetadataCallsForNonConformingClients = assumeLiteralNamesInMetadataCallsForNonConformingClients;
         this.assumeLiteralUnderscoreInMetadataCallsForNonConformingClients = assumeLiteralUnderscoreInMetadataCallsForNonConformingClients;
     }
 
@@ -1571,24 +1568,20 @@ public class TrinoDatabaseMetaData
     private String escapeIfNecessary(@Nullable String namePattern)
             throws SQLException
     {
-        return escapeIfNecessary(assumeLiteralNamesInMetadataCallsForNonConformingClients, assumeLiteralUnderscoreInMetadataCallsForNonConformingClients, namePattern);
+        return escapeIfNecessary(assumeLiteralUnderscoreInMetadataCallsForNonConformingClients, namePattern);
     }
 
     @Nullable
     static String escapeIfNecessary(
-            boolean assumeLiteralNamesInMetadataCallsForNonConformingClients,
             boolean assumeLiteralUnderscoreInMetadataCallsForNonConformingClients,
             @Nullable String namePattern)
     {
-        checkArgument(
-                !assumeLiteralNamesInMetadataCallsForNonConformingClients || !assumeLiteralUnderscoreInMetadataCallsForNonConformingClients,
-                "assumeLiteralNamesInMetadataCallsForNonConformingClients and assumeLiteralUnderscoreInMetadataCallsForNonConformingClients cannot be both true");
-        if (namePattern == null || (!assumeLiteralNamesInMetadataCallsForNonConformingClients && !assumeLiteralUnderscoreInMetadataCallsForNonConformingClients)) {
+        if (namePattern == null || (!assumeLiteralUnderscoreInMetadataCallsForNonConformingClients)) {
             return namePattern;
         }
         //noinspection ConstantConditions
         verify(SEARCH_STRING_ESCAPE.equals("\\"));
-        return namePattern.replaceAll(assumeLiteralNamesInMetadataCallsForNonConformingClients ? "[_%\\\\]" : "[_\\\\]", "\\\\$0");
+        return namePattern.replaceAll("[_\\\\]", "\\\\$0");
     }
 
     private static void optionalStringLikeFilter(List<String> filters, String columnName, String value)

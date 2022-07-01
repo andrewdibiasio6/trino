@@ -1526,25 +1526,18 @@ public class TestTrinoDatabaseMetaData
     public void testEscapeIfNecessary()
             throws SQLException
     {
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, false, null), null);
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, false, "a"), "a");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, false, "abc_def"), "abc_def");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, false, "abc__de_f"), "abc__de_f");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, false, "abc%def"), "abc%def");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, false, "abc\\_def"), "abc\\_def");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, null), null);
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, "a"), "a");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, "abc_def"), "abc_def");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, "abc__de_f"), "abc__de_f");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, "abc%def"), "abc%def");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, "abc\\_def"), "abc\\_def");
 
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, false, null), null);
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, false, "a"), "a");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, false, "abc_def"), "abc\\_def");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, false, "abc__de_f"), "abc\\_\\_de\\_f");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, false, "abc%def"), "abc\\%def");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, false, "abc\\_def"), "abc\\\\\\_def");
-
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, true, null), null);
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, true, "a"), "a");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, true, "abc_def"), "abc\\_def");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, true, "abc__de_f"), "abc\\_\\_de\\_f");
-        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(false, true, "abc\\_def"), "abc\\\\\\_def");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, null), null);
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, "a"), "a");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, "abc_def"), "abc\\_def");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, "abc__de_f"), "abc\\_\\_de\\_f");
+        assertEquals(TrinoDatabaseMetaData.escapeIfNecessary(true, "abc\\_def"), "abc\\\\\\_def");
     }
 
     @Test

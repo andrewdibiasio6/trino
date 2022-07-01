@@ -18,6 +18,9 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import io.airlift.units.Duration;
 import io.trino.client.ClientSelectedRole;
 import io.trino.client.ClientSession;
@@ -79,6 +82,8 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 public class TrinoConnection
         implements Connection
 {
+    private static final Logger logger = Logger.getLogger(TrinoConnection.class.getPackage().getName());
+
     private final AtomicBoolean closed = new AtomicBoolean();
     private final AtomicBoolean autoCommit = new AtomicBoolean(true);
     private final AtomicInteger isolationLevel = new AtomicInteger(TRANSACTION_READ_UNCOMMITTED);
@@ -96,7 +101,6 @@ public class TrinoConnection
     private final Optional<String> user;
     private final Optional<String> sessionUser;
     private final boolean compressionDisabled;
-    private final boolean assumeLiteralNamesInMetadataCallsForNonConformingClients;
     private final boolean assumeLiteralUnderscoreInMetadataCallsForNonConformingClients;
     private final Map<String, String> extraCredentials;
     private final Optional<String> applicationNamePrefix;
@@ -123,8 +127,15 @@ public class TrinoConnection
         this.source = uri.getSource();
         this.extraCredentials = uri.getExtraCredentials();
         this.compressionDisabled = uri.isCompressionDisabled();
-        this.assumeLiteralNamesInMetadataCallsForNonConformingClients = uri.isAssumeLiteralNamesInMetadataCallsForNonConformingClients();
-        this.assumeLiteralUnderscoreInMetadataCallsForNonConformingClients = uri.isAssumeLiteralUnderscoreInMetadataCallsForNonConformingClients();
+
+        if (uri.isAssumeLiteralNamesInMetadataCallsForNonConformingClients()) {
+            logger.log(Level.WARNING, "Connection config assumeLiteralNamesInMetadataCallsForNonConformingClients is deprecated, please use " +
+                    "assumeLiteralUnderscoreInMetadataCallsForNonConformingClients. Enabling assumeLiteralUnderscoreInMetadataCallsForNonConformingClients.");
+            this.assumeLiteralUnderscoreInMetadataCallsForNonConformingClients = true;
+        } else {
+            this.assumeLiteralUnderscoreInMetadataCallsForNonConformingClients = uri.isAssumeLiteralUnderscoreInMetadataCallsForNonConformingClients();
+        }
+
         this.httpClient = requireNonNull(httpClient, "httpClient is null");
         uri.getClientInfo().ifPresent(tags -> clientInfo.put(CLIENT_INFO, tags));
         uri.getClientTags().ifPresent(tags -> clientInfo.put(CLIENT_TAGS, tags));
@@ -273,7 +284,7 @@ public class TrinoConnection
     public DatabaseMetaData getMetaData()
             throws SQLException
     {
-        return new TrinoDatabaseMetaData(this, assumeLiteralNamesInMetadataCallsForNonConformingClients, assumeLiteralUnderscoreInMetadataCallsForNonConformingClients);
+        return new TrinoDatabaseMetaData(this, assumeLiteralUnderscoreInMetadataCallsForNonConformingClients);
     }
 
     @Override
